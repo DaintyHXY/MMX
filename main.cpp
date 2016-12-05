@@ -5,6 +5,11 @@
 */
 
 #include <windows.h>
+#include <iostream>
+#include "cstring"
+#include <exception>
+#include <stdio.h>
+#include <tchar.h>
 
 static char g_szClassName[] = "MyWindowClass";
 static HINSTANCE g_hInst = NULL;
@@ -30,7 +35,7 @@ int deltaValue = 4;
    FillRect(hdc, &rc, (HBRUSH)(COLOR_BTNFACE+1));
 }*/
 
-void DrawBall(HDC hdc)
+/*void DrawBall(HDC hdc)
 {
    HDC hdcMemory;
    hdcMemory = CreateCompatibleDC(hdc);
@@ -42,7 +47,7 @@ void DrawBall(HDC hdc)
    BitBlt(hdc, ballX, ballY, bm.bmWidth, bm.bmHeight, hdcMemory, 0, 0, SRCPAINT);
 
    DeleteDC(hdcMemory);
-}
+}*/
 
 int Mmx(LPBYTE Picture1,LPBYTE Picture2,LPBYTE Picture,int intWidth,int intHeight,int RGB_Bit,int i){
 	int x,y;
@@ -55,33 +60,30 @@ int Mmx(LPBYTE Picture1,LPBYTE Picture2,LPBYTE Picture,int intWidth,int intHeigh
 		temp1=(LPDWORD)(Picture1+intWidth*RGB_Bit/8*y);
 		temp2=(LPDWORD)(Picture2+intWidth*RGB_Bit/8*y);
 		temp=(LPDWORD)(Picture+intWidth*RGB_Bit/8*y);
-		for(x=0;x<intWidth;x++){
-			__asm{
-				Result_pixel=A_pixel*fade+B_pixel*(1-fade)=(A-B)*fade+B;
-				pxor  mm7,mm7
-				movq  mm2,[fade1]
-				movq  mm3,[fade2]
-				mov   esi,[temp1]
-				mov   edx,[temp2]
-				mov   edi,[temp]
-				movd  mm0,[esi]
-				movd  mm1,[edx]
-				punpcklbw mm0,mm7
-				punpcklbw mm1,mm7
-				pmulhw mm0,mm2
-				pmulhw mm1,mm3
-				paddw  mm0,mm1
-				packuswb mm0,mm7
-				movd   [edi],mm0
-				
-				
-			}
+		for(x=0;x<intWidth;x++){		
+			/*Result_pixel=A_pixel*fade+B_pixel*(1-fade)=(A-B)*fade+B;*/
+			__asm("pxor  mm7,mm7");
+			__asm("movq  mm2,[fade1]");	
+			__asm("movq  mm3,[fade2]");	
+			__asm("mov   esi,[temp1]");	
+			__asm("mov   edx,[temp2]");	
+			__asm("mov   edi,[temp]");	
+			__asm("movd  mm0,[esi]");
+			__asm("movd  mm1,[edx]");
+			__asm("punpcklbw mm0,mm7");	
+			__asm("punpcklbw mm1,mm7");	
+			__asm("pmulhw mm0,mm2");
+			__asm("pmulhw mm1,mm3");	
+			__asm("paddw  mm0,mm1");	
+			__asm("packuswb mm0,mm7");	
+			__asm("movd   [edi],mm0");	
+			
 			temp1++;
 			temp2++;
 			temp++;
 		}
 	}
-	__asm EMMS
+	__asm ("EMMS");
 	return 0;
 }
 
@@ -97,50 +99,52 @@ int Mmx2(LPBYTE Picture1,LPBYTE Picture2,LPBYTE Picture,int intWidth,int intHeig
 	temp2=(LPBYTE)(Picture2+intWidth*RGB_Bit/8*y);
 	temp=(LPBYTE)(Picture+intWidth*RGB_Bit/8*y);
 	for(x=0;x<3*intWidth;x++){
-		__asm{
-			mov dh,[fade1]
-			mov dl,[fade2]
-			mov ecx,[temp1]
-			mov bh,[ecx]
-			mov esi,[temp2]
-			mov bl,[esi]
-			mov al,dh
-			mul bh
-			mov edi,[temp]
-			mov [edi],ah
-			mov al,dl
-			mul bl
-			add ah,[edi]
-			mov [edi],ah
+		__asm("mov dh,[fade1]");	
+		__asm("mov dl,[fade2]");	
+		__asm("mov ecx,[temp1]");	
+		__asm("mov bh,[ecx]");	
+		__asm("mov esi,[temp2]");	
+		__asm("mov bl,[esi]");	
+		__asm("mov al,dh");	
+		__asm("mul bh");	
+		__asm("mov edi,[temp]");	
+		__asm("mov [edi],ah");	
+		__asm("mov al,dl");	
+		__asm("mul bl");	
+		__asm("add ah,[edi]");	
+		__asm("mov [edi],ah");	
 			
-		}
+		
 		temp1++;
 		temp2++;
 		temp++;
 	}
  }
- __asm EMMS
- return0;
+ __asm("EMMS"); 
+ return 0;
 }
 
 void Test_MMX(int intWidth,int intHeight,int RGB_Bit,int Time){
-	__try{
-		_asm EMMS
+   /* try{
+		__asm("EMMS");
 		
 	}
-	__except(EXCEPTION_EXECUTE_HANDLER){
+	catch(...){
+		 
 	}
+	except(EXCEPTION_EXECUTE_HANDLER){
+	}*/
 	HDC hDC;
 	LPBITMAPINFO lpInfo;
 	int intSize,i;
-	LPBYTE lpBufl,lpBuf2,lpBuf;
-	HEILE Picture1,Picture2;
-	Picture1=_lopen("test3.bmp",OF_READ);
-	Picture2=_lopen("test4.bmp",OF_READ);
+	LPBYTE lpBuf1,lpBuf2,lpBuf;
+	HFILE Picture1,Picture2;
+	Picture1=_lopen("ball.bmp",OF_READ);
+	Picture2=_lopen("ballmask.bmp",OF_READ);
 	intSize=GetFileSize((HANDLE)Picture1,NULL);
-	lpBuf1(LPBYTE)LocalAlloc(LPTR,inSize);
-	lpBuf2(LPBYTE)LocalAlloc(LPTR,inSize);
-	lpBuf(LPBYTE)LocalAlloc(LPTR,inSize);
+	lpBuf1=(LPBYTE)LocalAlloc(LPTR,intSize);
+	lpBuf2=(LPBYTE)LocalAlloc(LPTR,intSize);
+	lpBuf=(LPBYTE)LocalAlloc(LPTR,intSize);
 	_lread(Picture1,lpBuf1,intSize);
 	_lread(Picture2,lpBuf2,intSize);
 	_lclose(Picture1);
@@ -148,7 +152,7 @@ void Test_MMX(int intWidth,int intHeight,int RGB_Bit,int Time){
 	memcpy(lpBuf,lpBuf1,intSize);
 	lpInfo=(LPBITMAPINFO)(lpBuf+0x0e);
 	hDC=GetDC(NULL);
-	For(i=0;i<255;i++){
+	for(i=0;i<255;i++){
 		Mmx(lpBuf1+0x60,lpBuf2+0x60,lpBuf+0x60,intWidth,intHeight,RGB_Bit,i);
 		SetDIBitsToDevice(hDC,300,150,intWidth,intHeight,0,0,0,480,lpBuf+0x60,lpInfo,DIB_RGB_COLORS);
 		
@@ -161,7 +165,7 @@ void Test_MMX(int intWidth,int intHeight,int RGB_Bit,int Time){
 	
 }
 using namespace std;
-int _tmain(int argc,__TCHAR*argv[]){
+int _tmain(int argc,_TCHAR*argv[]){
 	DWORD start_time=GetTickCount();
 	Test_MMX(640,480,24,8);
 	DWORD end_time=GetTickCount();
@@ -194,7 +198,7 @@ int _tmain(int argc,__TCHAR*argv[]){
       ballY = rc.bottom - bm.bmHeight;
       deltaY = -deltaValue;
    }
-}*/
+}
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
@@ -218,7 +222,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
          deltaY = deltaValue;
 
       break;
-     /* case WM_TIMER:
+     case WM_TIMER:
          if(hbmBall && hbmMask)
          {
             HDC hdcWindow;
@@ -230,7 +234,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 
             ReleaseDC(hwnd, hdcWindow);
          }
-      break;*/
+      break;
       case WM_PAINT:
          if(hbmBall && hbmMask)
          {
@@ -313,5 +317,5 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
       DispatchMessage(&Msg);
    }
    return Msg.wParam;
-}
+}*/
 
